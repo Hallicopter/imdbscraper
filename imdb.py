@@ -5,9 +5,12 @@ import scrapy
 class ImdbSpider(scrapy.Spider):
     name = 'imdb'
     allowed_domains = ['imdb.com']
-    src = 'http://www.imdb.com/search/title?countries=%C2%B7%C2%B7%C2%B7%C2%A0Common%20Countries%C2%A0%C2%B7%C2%B7%C2%B7&groups=top_100&languages=%C2%B7%C2%B7%C2%B7%C2%A0Common%20Languages%C2%A0%C2%B7%C2%B7%C2%B7&title_type=feature'
-    start_urls = [src]
+    
 
+    def __init__(self, search = None, *args, **kwargs):
+        self.start_urls = [search ]
+        super().__init__(**kwargs)
+        
     def parse(self, response):
         self.log('Just visited '+ response.url)
         films_src = response.xpath("//div[1]/div[1]/div[3]/div/div[3]")
