@@ -21,6 +21,6 @@ class ImdbSpider(scrapy.Spider):
             yield film_dat
         # Follow the pagination link
         next_page_url = response.xpath("//div[1]/div[1]/div[4]/div[1]/a[1]/@href").extract()[0]
-        if next_page_url:
+        if 'adv_nxt' in next_page_url:
             next_page_url = response.urljoin(next_page_url)
             yield scrapy.Request(url=next_page_url, callback=self.parse)
