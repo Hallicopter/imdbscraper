@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 import scrapy
-
+import re
 
 class ImdbSpider(scrapy.Spider):
     name = 'imdb'
@@ -15,7 +15,14 @@ class ImdbSpider(scrapy.Spider):
         self.log('Just visited '+ response.url)
         films_src = response.xpath("//div[1]/div[1]/div[3]/div/div[3]")
         for film in films_src:
+            runtime = film.xpath("p[1]/span[3]/text()").extract()[0]
+            if runtime == None:
+                runtime = "N/A"
+            else:
+                runtime = re.findall(r'[0-9]+', runtime)[0]
+
             film_dat = {
+                'runtime': runtime,
                 'film_name' :film.xpath("h3[1]/a[1]/text()").extract(),
                 'director'  : film.xpath("p[3]/a/text()").extract()[0],
                 'lead_actors': film.xpath("p[3]/a/text()").extract()[1:],
