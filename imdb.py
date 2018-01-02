@@ -15,22 +15,38 @@ class ImdbSpider(scrapy.Spider):
         self.log('Just visited '+ response.url)
         films_src = response.xpath("//div[1]/div[1]/div[3]/div/div[3]")
         for film in films_src:
-            runtime = film.xpath("p[1]/span[3]/text()").extract()[0]
-            if runtime == None:
+            runtime = film.xpath("p[1]/span/text()").extract()
+            runtime = re.findall(r'[0-9]+', str(runtime))
+            director = film.xpath("p/text()").extract()
+            actor = film.xpath("p/text()").extract()
+
+            if "Director" in str(director):
+                director = film.xpath("p[3]/a/text()").extract()[0]
+            else:
+                director = "N/A"
+            if "Actor" in str(actor):
+                actor = film.xpath("p[3]/a/text()").extract()[1:0]
+            else:
+                actor = "N/A"
+            if runtime == []:
                 runtime = "N/A"
             else:
-                runtime = re.findall(r'[0-9]+', runtime)[0]
+                print('This', runtime)
+                runtime = runtime[0]
 
             film_dat = {
                 'runtime': runtime,
                 'film_name' :film.xpath("h3[1]/a[1]/text()").extract(),
-                'director'  : film.xpath("p[3]/a/text()").extract()[0],
-                'lead_actors': film.xpath("p[3]/a/text()").extract()[1:],
+                'director'  : director,
+                'lead_actors': actor,
                 'imdb_link' : 'http://www.imdb.com'+film.xpath("h3[1]/a[1]/@href").extract()[0]
             }
             yield film_dat
         # Follow the pagination link
-        next_page_url = response.xpath("//div[1]/div[1]/div[4]/div[1]/a[1]/@href").extract()[0]
-        if 'adv_nxt' in next_page_url:
-            next_page_url = response.urljoin(next_page_url)
-            yield scrapy.Request(url=next_page_url, callback=self.parse)
+        next_page_url = response.xpath("//div[1]/div[1]/div[4]/div[1]/a/@href").extract()
+        for url in next_page_url:
+            if 'adv_nxt' in url:
+                url = response.urljoin(url)
+                print('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~',url)
+                yield scrapy.Request(url=url, callback=self.parse)
+                break
