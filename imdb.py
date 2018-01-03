@@ -24,7 +24,7 @@ class ImdbSpider(scrapy.Spider):
                 director = film.xpath("p[3]/a/text()").extract()[0]
             else:
                 director = "N/A"
-            if "Actor" in str(actor):
+            if "Stars" in str(actor):
                 actor = film.xpath("p[3]/a/text()").extract()[1:0]
             else:
                 actor = "N/A"
@@ -35,6 +35,7 @@ class ImdbSpider(scrapy.Spider):
                 runtime = runtime[0]
 
             film_dat = {
+                'release': re.findall(r'\(([^)]+)\)',str(film.xpath("h3/span/text()").extract()))[0],
                 'runtime': runtime,
                 'film_name' :film.xpath("h3[1]/a[1]/text()").extract(),
                 'director'  : director,
